@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎂 生日驚喜倒數 🎂</title>
+    <style>
+        body { margin: 0; background: #1a1a1a; color: white; font-family: sans-serif; height: 100vh; display: flex; justify-content: center; align-items: center; text-align: center; }
+        #timer { font-size: 3.5rem; font-weight: bold; background: #333; padding: 20px; border-radius: 15px; margin: 20px 0; color: #ffce00; }
+        button { display: none; padding: 20px 40px; font-size: 1.5rem; background: #ff4b2b; color: white; border: none; border-radius: 50px; cursor: pointer; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% {transform: scale(1);} 50% {transform: scale(1.05);} 100% {transform: scale(1);} }
+    </style>
+</head>
+<body>
+    <div>
+        <div id="countdown-ui">
+            <h1>🎁 距離驚喜還有...</h1>
+            <div id="timer">00:00:00</div>
+        </div>
+        <button id="gift-btn" onclick="location.href='https://youtu.be/n5h1ijjV-Sc?si=tFSji8U_an91nisG'">點擊領取生日禮物 🎂</button>
+    </div>
+
+    <script>
+        // 設定目標日期 (請修改這裡)
+        const targetDate = new Date("2026-03-25 00:00:00").getTime();
+
+        setInterval(() => {
+            const now = new Date().getTime();
+            const diff = targetDate - now;
+            if (diff <= 0) {
+                document.getElementById('countdown-ui').style.display = 'none';
+                document.getElementById('gift-btn').style.display = 'inline-block';
+                return;
+            }
+            const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const m = Math.floor((diff / 1000 / 60) % 60);
+            const s = Math.floor((diff / 1000) % 60);
+            document.getElementById('timer').innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        }, 1000);
+    </script>
+</body>
+</html>
