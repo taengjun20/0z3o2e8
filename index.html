@@ -15,7 +15,31 @@
             display: flex; justify-content: center; align-items: center;
             text-align: center;
         }
-        #timer { font-size: 5rem; font-weight: 300; letter-spacing: 10px; }
+        
+        /* 倒數計時容器 */
+        #countdown-ui {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            align-items: baseline;
+        }
+
+        /* 數字樣式 */
+        .time-part {
+            font-size: 3.5rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        /* 單位標籤樣式 (DAYS, HRs, etc.) */
+        .label {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: #666;
+            margin-left: 5px;
+            text-transform: uppercase;
+        }
+
         #login-section { display: none; width: 280px; }
         .input-group { margin-bottom: 25px; text-align: left; }
         input {
@@ -32,14 +56,22 @@
         .btn:hover { background-color: #ffffff; color: #000000; }
         #gift-btn { display: none; }
         #error-msg { color: #ff4b2b; font-size: 0.75rem; margin-bottom: 15px; height: 1rem; display: none; }
-        @media (max-width: 600px) { #timer { font-size: 3rem; letter-spacing: 5px; } }
+
+        @media (max-width: 600px) {
+            #countdown-ui { gap: 10px; }
+            .time-part { font-size: 1.8rem; }
+            .label { font-size: 0.6rem; }
+        }
     </style>
 </head>
 <body>
 
     <div>
         <div id="countdown-ui">
-            <div id="timer">00:00:00</div>
+            <div><span id="days" class="time-part">00</span><span class="label">Days</span></div>
+            <div><span id="hours" class="time-part">00</span><span class="label">HRs</span></div>
+            <div><span id="minutes" class="time-part">00</span><span class="label">MINs</span></div>
+            <div><span id="seconds" class="time-part">00</span><span class="label">SECs</span></div>
         </div>
 
         <div id="login-section">
@@ -60,11 +92,9 @@
     </div>
 
     <script>
-        // --- 核心修正：強制指定台北時區 (GMT+0800) ---
-        // 這樣不論他在德國還是哪裡，都會以台北時間為準
+        // 設定目標：2026年3月28日 00:00 台北時間 (GMT+8)
         const targetDate = new Date("2026-03-28T00:00:00+08:00").getTime();
 
-        const timerEl = document.getElementById('timer');
         const countdownBox = document.getElementById('countdown-ui');
         const loginSection = document.getElementById('login-section');
         const inputContainer = document.getElementById('input-container');
@@ -82,10 +112,15 @@
                 return;
             }
 
-            const h = Math.floor((diff / (1000 * 60 * 60))); // 總剩餘小時，不設 24 小時限，確保顯示準確
+            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
             const m = Math.floor((diff / 1000 / 60) % 60);
             const s = Math.floor((diff / 1000) % 60);
-            timerEl.innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+
+            document.getElementById('days').innerText = d.toString().padStart(2, '0');
+            document.getElementById('hours').innerText = h.toString().padStart(2, '0');
+            document.getElementById('minutes').innerText = m.toString().padStart(2, '0');
+            document.getElementById('seconds').innerText = s.toString().padStart(2, '0');
         }, 1000);
 
         function checkLogin() {
