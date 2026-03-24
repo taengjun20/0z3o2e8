@@ -15,30 +15,26 @@
             display: flex; justify-content: center; align-items: center;
             text-align: center;
         }
-        
-        /* 倒數計時容器 */
+
+        /* 音樂控制按鈕 (右上角) */
+        #music-control {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            cursor: pointer;
+            font-size: 1.5rem;
+            opacity: 0.6;
+            transition: opacity 0.3s;
+            user-select: none;
+        }
+        #music-control:hover { opacity: 1; }
+
         #countdown-ui {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            align-items: baseline;
+            display: flex; gap: 20px; justify-content: center; align-items: baseline;
         }
 
-        /* 數字樣式 */
-        .time-part {
-            font-size: 3.5rem;
-            font-weight: 300;
-            letter-spacing: 2px;
-        }
-
-        /* 單位標籤樣式 (DAYS, HRs, etc.) */
-        .label {
-            font-size: 0.8rem;
-            font-weight: 400;
-            color: #666;
-            margin-left: 5px;
-            text-transform: uppercase;
-        }
+        .time-part { font-size: 3.5rem; font-weight: 300; letter-spacing: 2px; }
+        .label { font-size: 0.8rem; font-weight: 400; color: #666; margin-left: 5px; text-transform: uppercase; }
 
         #login-section { display: none; width: 280px; }
         .input-group { margin-bottom: 25px; text-align: left; }
@@ -61,10 +57,17 @@
             #countdown-ui { gap: 10px; }
             .time-part { font-size: 1.8rem; }
             .label { font-size: 0.6rem; }
+            #music-control { top: 20px; right: 20px; }
         }
     </style>
 </head>
 <body>
+
+    <audio id="myAudio" loop>
+        <source src="bgm.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="music-control" onclick="toggleMusic()">🎵</div>
 
     <div>
         <div id="countdown-ui">
@@ -92,8 +95,22 @@
     </div>
 
     <script>
-        // 設定目標：2026年3月28日 00:00 台北時間 (GMT+8)
         const targetDate = new Date("2026-03-28T00:00:00+08:00").getTime();
+        const audio = document.getElementById('myAudio');
+        const musicBtn = document.getElementById('music-control');
+
+        // 音樂開關切換
+        function toggleMusic() {
+            if (audio.paused) {
+                audio.play();
+                musicBtn.innerText = "🎶";
+                musicBtn.style.opacity = "1";
+            } else {
+                audio.pause();
+                musicBtn.innerText = "🎵";
+                musicBtn.style.opacity = "0.6";
+            }
+        }
 
         const countdownBox = document.getElementById('countdown-ui');
         const loginSection = document.getElementById('login-section');
@@ -104,19 +121,16 @@
         const interval = setInterval(() => {
             const now = new Date().getTime();
             const diff = targetDate - now;
-
             if (diff <= 0) {
                 clearInterval(interval);
                 countdownBox.style.display = 'none';
                 loginSection.style.display = 'block';
                 return;
             }
-
             const d = Math.floor(diff / (1000 * 60 * 60 * 24));
             const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
             const m = Math.floor((diff / 1000 / 60) % 60);
             const s = Math.floor((diff / 1000) % 60);
-
             document.getElementById('days').innerText = d.toString().padStart(2, '0');
             document.getElementById('hours').innerText = h.toString().padStart(2, '0');
             document.getElementById('minutes').innerText = m.toString().padStart(2, '0');
@@ -126,7 +140,6 @@
         function checkLogin() {
             const user = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value.trim();
-
             if (user.toLowerCase() === "zoe" && pass === "0328") {
                 errorMsg.style.display = 'none';
                 inputContainer.style.display = 'none';
