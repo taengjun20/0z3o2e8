@@ -14,21 +14,19 @@
             height: 100vh;
             display: flex; justify-content: center; align-items: center;
             text-align: center;
-            overflow: hidden;
         }
 
-        /* 倒數計時樣式 */
+        /* 倒數計時 */
         #timer {
             font-size: 5rem;
             font-weight: 300;
             letter-spacing: 10px;
-            margin-bottom: 20px;
         }
 
-        /* 登入區塊樣式 */
+        /* 登入區塊 */
         #login-section {
-            display: none; /* 倒數結束前隱藏 */
-            width: 300px;
+            display: none;
+            width: 280px;
         }
 
         .input-group {
@@ -40,55 +38,56 @@
             width: 100%;
             background: transparent;
             border: none;
-            border-bottom: 1px solid #ffffff; /* 極簡下底線 */
+            border-bottom: 1px solid #ffffff;
             color: #ffffff;
-            font-size: 1.1rem;
+            font-size: 1rem;
             padding: 10px 0;
             outline: none;
             font-family: 'Montserrat', sans-serif;
-            transition: border-bottom 0.3s ease;
-        }
-
-        input:focus {
-            border-bottom: 2px solid #ffffff;
+            letter-spacing: 1px;
         }
 
         .hint {
-            font-size: 0.7rem;
-            color: #666;
+            font-size: 0.65rem;
+            color: #555;
             margin-top: 5px;
             letter-spacing: 1px;
             text-transform: uppercase;
         }
 
-        /* Click me 按鈕 */
-        #gift-btn {
-            display: none; /* 預設隱藏，密碼正確才出現 */
-            padding: 18px 50px;
-            font-size: 1rem;
+        /* 按鈕通用樣式 */
+        .btn {
+            padding: 15px 40px;
+            font-size: 0.9rem;
             background-color: transparent;
             color: #ffffff;
             border: 1px solid #ffffff;
             border-radius: 2px;
             cursor: pointer;
-            transition: all 0.4s ease;
-            letter-spacing: 4px;
+            transition: all 0.3s ease;
+            letter-spacing: 3px;
             text-transform: uppercase;
-            margin-top: 20px;
+            width: 100%;
+            margin-top: 10px;
         }
 
-        #gift-btn:hover {
+        .btn:hover {
             background-color: #ffffff;
             color: #000000;
         }
 
-        /* 錯誤提示 */
+        /* 驚喜按鈕 (一開始隱藏) */
+        #gift-btn {
+            display: none;
+        }
+
+        /* 錯誤訊息 */
         #error-msg {
             color: #ff4b2b;
-            font-size: 0.8rem;
-            margin-top: 10px;
+            font-size: 0.75rem;
+            margin-bottom: 15px;
             height: 1rem;
-            visibility: hidden;
+            display: none; /* 預設隱藏 */
         }
 
         @media (max-width: 600px) {
@@ -104,31 +103,36 @@
         </div>
 
         <div id="login-section">
-            <div class="input-group">
-                <input type="text" id="username" placeholder="USERNAME" autocomplete="off">
-                <div class="hint">English name</div>
-            </div>
-            <div class="input-group">
-                <input type="password" id="password" placeholder="PASSWORD" autocomplete="off">
-                <div class="hint">Your birthday date</div>
-            </div>
-            <div id="error-msg">Incorrect credentials.</div>
+            <div id="error-msg">Incorrect password, please try again.</div>
             
-            <button id="gift-btn" onclick="goToVideo()">Click me</button>
+            <div id="input-container">
+                <div class="input-group">
+                    <input type="text" id="username" placeholder="USERNAME" spellcheck="false">
+                    <div class="hint">English name</div>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" placeholder="PASSWORD">
+                    <div class="hint">Your birthday date</div>
+                </div>
+                <button class="btn" onclick="checkLogin()">Login</button>
+            </div>
+
+            <button id="gift-btn" class="btn" onclick="location.href='https://youtu.be/n5h1ijjV-Sc?si=tFSji8U_an91nisG'">Click me</button>
         </div>
     </div>
 
     <script>
-        // --- 設定目標日期 (請根據需求修改) ---
-        const targetDate = new Date("2026-03-24 14:56:20").getTime();
+        // 設定目標日期
+        const targetDate = new Date("2026-03-24 00:00:00").getTime();
 
         const timerEl = document.getElementById('timer');
         const countdownBox = document.getElementById('countdown-ui');
         const loginSection = document.getElementById('login-section');
+        const inputContainer = document.getElementById('input-container');
         const giftBtn = document.getElementById('gift-btn');
         const errorMsg = document.getElementById('error-msg');
 
-        // 每秒更新倒數
+        // 倒數邏輯
         const interval = setInterval(() => {
             const now = new Date().getTime();
             const diff = targetDate - now;
@@ -146,28 +150,19 @@
             timerEl.innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
         }, 1000);
 
-        // 監聽輸入框，自動檢查帳密
-        const inputs = [document.getElementById('username'), document.getElementById('password')];
-        inputs.forEach(input => {
-            input.addEventListener('input', () => {
-                const user = document.getElementById('username').value;
-                const pass = document.getElementById('password').value;
+        // 登入驗證邏輯
+        function checkLogin() {
+            const user = document.getElementById('username').value.trim();
+            const pass = document.getElementById('password').value.trim();
 
-                // 檢查是否正確 (忽略大小寫)
-                if (user.toLowerCase() === "zoe" && pass === "0328") {
-                    giftBtn.style.display = 'inline-block';
-                    errorMsg.style.visibility = 'hidden';
-                } else {
-                    giftBtn.style.display = 'none';
-                    if (user !== "" && pass !== "") {
-                        errorMsg.style.visibility = 'visible';
-                    }
-                }
-            });
-        });
-
-        function goToVideo() {
-            window.location.href = 'https://youtu.be/n5h1ijjV-Sc?si=tFSji8U_an91nisG';
+            // 正確條件：Zoe 0328 (忽略大小寫)
+            if (user.toLowerCase() === "zoe" && pass === "0328") {
+                errorMsg.style.display = 'none';
+                inputContainer.style.display = 'none'; // 隱藏輸入框和 Login 鈕
+                giftBtn.style.display = 'block';     // 顯示 Click me
+            } else {
+                errorMsg.style.display = 'block';    // 顯示錯誤訊息
+            }
         }
     </script>
 </body>
