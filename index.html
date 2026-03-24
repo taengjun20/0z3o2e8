@@ -3,39 +3,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎂 生日驚喜倒數 🎂</title>
+    <title>🎂 精緻的生日驚喜倒數 🎂</title>
     <style>
-        body { margin: 0; background: #1a1a1a; color: white; font-family: sans-serif; height: 100vh; display: flex; justify-content: center; align-items: center; text-align: center; }
-        #timer { font-size: 3.5rem; font-weight: bold; background: #333; padding: 20px; border-radius: 15px; margin: 20px 0; color: #ffce00; }
-        button { display: none; padding: 20px 40px; font-size: 1.5rem; background: #ff4b2b; color: white; border: none; border-radius: 50px; cursor: pointer; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% {transform: scale(1);} 50% {transform: scale(1.05);} 100% {transform: scale(1);} }
+        /* 全域樣式：移除廉價感，增加高級黑 */
+        body {
+            margin: 0; padding: 0;
+            background: #0d0d0d; /* 深邃的黑色背景 */
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 背景動態光暈 (增加層次感) */
+        body::before {
+            content: '';
+            position: absolute; width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(255, 65, 108, 0.4), transparent 70%);
+            border-radius: 50%; top: 20%; left: 10%;
+            animation: drift 10s infinite linear alternate;
+        }
+        body::after {
+            content: '';
+            position: absolute; width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(255, 206, 0, 0.3), transparent 70%);
+            border-radius: 50%; bottom: 20%; right: 10%;
+            animation: drift 12s infinite linear alternate-reverse;
+        }
+
+        @keyframes drift { from { transform: translate(0, 0); } to { transform: translate(50px, 50px); } }
+
+        /* 磨砂玻璃外框 (Glassmorphism) */
+        .glass-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 50px 30px;
+            backdrop-filter: blur(20px);
+            width: 85%; max-width: 500px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+
+        /* 精緻的標題與文字描述 */
+        h1 {
+            font-size: 2.2rem;
+            color: #ffce00;
+            text-shadow: 0 0 15px rgba(255, 206, 0, 0.6);
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        p.description {
+            font-size: 1.1rem;
+            color: #aaa;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        /* 精緻的霓虹光暈倒數 */
+        #timer {
+            font-size: 3.8rem;
+            font-weight: 800;
+            font-family: monospace;
+            background: transparent;
+            color: #00ffcc;
+            text-shadow: 0 0 15px rgba(0, 255, 204, 0.8), 0 0 5px rgba(0, 255, 204, 0.5);
+            letter-spacing: 2px;
+            margin: 20px 0;
+            user-select: none;
+        }
+
+        /* 高級感金屬光澤漸層按鈕 */
+        #gift-btn {
+            display: none; /* 倒數結束前隱藏 */
+            padding: 22px 45px;
+            font-size: 1.7rem;
+            background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+            box-shadow: 0 10px 25px rgba(255, 65, 108, 0.5);
+            transition: all 0.3s ease;
+            position: relative; overflow: hidden;
+        }
+
+        /* 按鈕的金屬光澤掃過動畫 */
+        #gift-btn::after {
+            content: '';
+            position: absolute; top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(30deg);
+            transition: all 0.5s ease;
+            filter: blur(10px);
+        }
+
+        #gift-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(255, 65, 108, 0.7);
+        }
+        #gift-btn:hover::after { left: 100%; }
+
+        /* 倒數區域 */
+        #countdown-ui {
+            display: block;
+        }
     </style>
 </head>
 <body>
-    <div>
+
+    <div class="glass-box">
         <div id="countdown-ui">
-            <h1>🎁 距離驚喜還有...</h1>
+            <h1>🎂 專屬你的驚喜時光</h1>
+            <p class="description">當零點鐘聲敲響，<br>世界將為你點亮第一盞燈。 🎁</p>
             <div id="timer">00:00:00</div>
         </div>
-        <button id="gift-btn" onclick="location.href='https://youtu.be/n5h1ijjV-Sc?si=tFSji8U_an91nisG'">點擊領取生日禮物 🎂</button>
+        
+        <button id="gift-btn" onclick="location.href='https://youtu.be/n5h1ijjV-Sc?si=tFSji8U_an91nisG'">🎁 領取生日驚喜</button>
     </div>
 
     <script>
-        // 設定目標日期 (請修改這裡)
-        const targetDate = new Date("2026-03-24 14:42:00").getTime();
+        // --- 1. 設定目標時間 (測試用：設定為 5 秒後) ---
+        // 測試成功後，再改成你朋友的生日，例如 "2026-03-25 00:00:00"
+        let targetDate = new Date().getTime() + 5000; 
 
+        const timerEl = document.getElementById('timer');
+        const sectionEl = document.getElementById('countdown-ui');
+        const btnEl = document.getElementById('gift-btn');
+
+        // 每秒更新倒數
         setInterval(() => {
             const now = new Date().getTime();
             const diff = targetDate - now;
+
             if (diff <= 0) {
-                document.getElementById('countdown-ui').style.display = 'none';
-                document.getElementById('gift-btn').style.display = 'inline-block';
+                // 時間到！
+                sectionEl.style.display = 'none';
+                btnEl.style.display = 'inline-block';
                 return;
             }
+
+            // 計算時、分、秒
             const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
             const m = Math.floor((diff / 1000 / 60) % 60);
             const s = Math.floor((diff / 1000) % 60);
-            document.getElementById('timer').innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            
+            // 顯示在網頁上並補零
+            timerEl.innerText = 
+                h.toString().padStart(2, '0') + ":" + 
+                m.toString().padStart(2, '0') + ":" + 
+                s.toString().padStart(2, '0');
         }, 1000);
     </script>
 </body>
