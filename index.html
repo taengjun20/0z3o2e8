@@ -3,44 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Birthday Countdown</title>
+    <title>Private Countdown</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        /* 全黑背景，極簡純白風格 */
         body {
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             background-color: #000000;
             color: #ffffff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: 'Montserrat', sans-serif;
             height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            display: flex; justify-content: center; align-items: center;
             text-align: center;
             overflow: hidden;
         }
 
-        /* 純白色倒數文字 */
+        /* 倒數計時樣式 */
         #timer {
             font-size: 5rem;
-            font-weight: 300; /* 較細的字體看起來更有質感 */
-            letter-spacing: 4px;
+            font-weight: 300;
+            letter-spacing: 10px;
             margin-bottom: 20px;
+        }
+
+        /* 登入區塊樣式 */
+        #login-section {
+            display: none; /* 倒數結束前隱藏 */
+            width: 300px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid #ffffff; /* 極簡下底線 */
+            color: #ffffff;
+            font-size: 1.1rem;
+            padding: 10px 0;
+            outline: none;
+            font-family: 'Montserrat', sans-serif;
+            transition: border-bottom 0.3s ease;
+        }
+
+        input:focus {
+            border-bottom: 2px solid #ffffff;
+        }
+
+        .hint {
+            font-size: 0.7rem;
+            color: #666;
+            margin-top: 5px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
         /* Click me 按鈕 */
         #gift-btn {
-            display: none;
-            padding: 15px 40px;
-            font-size: 1.2rem;
+            display: none; /* 預設隱藏，密碼正確才出現 */
+            padding: 18px 50px;
+            font-size: 1rem;
             background-color: transparent;
             color: #ffffff;
-            border: 1px solid #ffffff; /* 白色邊框 */
-            border-radius: 4px; /* 微圓角 */
+            border: 1px solid #ffffff;
+            border-radius: 2px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            letter-spacing: 2px;
+            transition: all 0.4s ease;
+            letter-spacing: 4px;
             text-transform: uppercase;
+            margin-top: 20px;
         }
 
         #gift-btn:hover {
@@ -48,8 +82,17 @@
             color: #000000;
         }
 
+        /* 錯誤提示 */
+        #error-msg {
+            color: #ff4b2b;
+            font-size: 0.8rem;
+            margin-top: 10px;
+            height: 1rem;
+            visibility: hidden;
+        }
+
         @media (max-width: 600px) {
-            #timer { font-size: 3rem; }
+            #timer { font-size: 3rem; letter-spacing: 5px; }
         }
     </style>
 </head>
@@ -59,19 +102,33 @@
         <div id="countdown-ui">
             <div id="timer">00:00:00</div>
         </div>
-        
-        <button id="gift-btn" onclick="location.href='https://youtu.be/n5h1ijjV-Sc?si=tFSji8U_an91nisG'">Click me</button>
+
+        <div id="login-section">
+            <div class="input-group">
+                <input type="text" id="username" placeholder="USERNAME" autocomplete="off">
+                <div class="hint">English name</div>
+            </div>
+            <div class="input-group">
+                <input type="password" id="password" placeholder="PASSWORD" autocomplete="off">
+                <div class="hint">Your birthday date</div>
+            </div>
+            <div id="error-msg">Incorrect credentials.</div>
+            
+            <button id="gift-btn" onclick="goToVideo()">Click me</button>
+        </div>
     </div>
 
     <script>
-        // --- 設定目標日期 (請修改這裡) ---
-        // 範例：2026-03-25 00:00:00
-        const targetDate = new Date("2026-03-24 14:20:00").getTime();
+        // --- 設定目標日期 (請根據需求修改) ---
+        const targetDate = new Date("2026-03-24 14:56:20").getTime();
 
         const timerEl = document.getElementById('timer');
         const countdownBox = document.getElementById('countdown-ui');
+        const loginSection = document.getElementById('login-section');
         const giftBtn = document.getElementById('gift-btn');
+        const errorMsg = document.getElementById('error-msg');
 
+        // 每秒更新倒數
         const interval = setInterval(() => {
             const now = new Date().getTime();
             const diff = targetDate - now;
@@ -79,19 +136,39 @@
             if (diff <= 0) {
                 clearInterval(interval);
                 countdownBox.style.display = 'none';
-                giftBtn.style.display = 'inline-block';
+                loginSection.style.display = 'block';
                 return;
             }
 
             const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
             const m = Math.floor((diff / 1000 / 60) % 60);
             const s = Math.floor((diff / 1000) % 60);
-
-            timerEl.innerText = 
-                h.toString().padStart(2, '0') + ":" + 
-                m.toString().padStart(2, '0') + ":" + 
-                s.toString().padStart(2, '0');
+            timerEl.innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
         }, 1000);
+
+        // 監聽輸入框，自動檢查帳密
+        const inputs = [document.getElementById('username'), document.getElementById('password')];
+        inputs.forEach(input => {
+            input.addEventListener('input', () => {
+                const user = document.getElementById('username').value;
+                const pass = document.getElementById('password').value;
+
+                // 檢查是否正確 (忽略大小寫)
+                if (user.toLowerCase() === "zoe" && pass === "0328") {
+                    giftBtn.style.display = 'inline-block';
+                    errorMsg.style.visibility = 'hidden';
+                } else {
+                    giftBtn.style.display = 'none';
+                    if (user !== "" && pass !== "") {
+                        errorMsg.style.visibility = 'visible';
+                    }
+                }
+            });
+        });
+
+        function goToVideo() {
+            window.location.href = 'https://youtu.be/n5h1ijjV-Sc?si=tFSji8U_an91nisG';
+        }
     </script>
 </body>
 </html>
