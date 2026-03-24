@@ -15,84 +15,24 @@
             display: flex; justify-content: center; align-items: center;
             text-align: center;
         }
-
-        /* 倒數計時 */
-        #timer {
-            font-size: 5rem;
-            font-weight: 300;
-            letter-spacing: 10px;
-        }
-
-        /* 登入區塊 */
-        #login-section {
-            display: none;
-            width: 280px;
-        }
-
-        .input-group {
-            margin-bottom: 25px;
-            text-align: left;
-        }
-
+        #timer { font-size: 5rem; font-weight: 300; letter-spacing: 10px; }
+        #login-section { display: none; width: 280px; }
+        .input-group { margin-bottom: 25px; text-align: left; }
         input {
-            width: 100%;
-            background: transparent;
-            border: none;
-            border-bottom: 1px solid #ffffff;
-            color: #ffffff;
-            font-size: 1rem;
-            padding: 10px 0;
-            outline: none;
-            font-family: 'Montserrat', sans-serif;
-            letter-spacing: 1px;
+            width: 100%; background: transparent; border: none; border-bottom: 1px solid #ffffff;
+            color: #ffffff; font-size: 1rem; padding: 10px 0; outline: none;
+            font-family: 'Montserrat', sans-serif; letter-spacing: 1px;
         }
-
-        .hint {
-            font-size: 0.65rem;
-            color: #555;
-            margin-top: 5px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        /* 按鈕通用樣式 */
+        .hint { font-size: 0.65rem; color: #555; margin-top: 5px; letter-spacing: 1px; text-transform: uppercase; }
         .btn {
-            padding: 15px 40px;
-            font-size: 0.9rem;
-            background-color: transparent;
-            color: #ffffff;
-            border: 1px solid #ffffff;
-            border-radius: 2px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            width: 100%;
-            margin-top: 10px;
+            padding: 15px 40px; font-size: 0.9rem; background-color: transparent; color: #ffffff;
+            border: 1px solid #ffffff; border-radius: 2px; cursor: pointer;
+            transition: all 0.3s ease; letter-spacing: 3px; text-transform: uppercase; width: 100%; margin-top: 10px;
         }
-
-        .btn:hover {
-            background-color: #ffffff;
-            color: #000000;
-        }
-
-        /* 驚喜按鈕 (一開始隱藏) */
-        #gift-btn {
-            display: none;
-        }
-
-        /* 錯誤訊息 */
-        #error-msg {
-            color: #ff4b2b;
-            font-size: 0.75rem;
-            margin-bottom: 15px;
-            height: 1rem;
-            display: none; /* 預設隱藏 */
-        }
-
-        @media (max-width: 600px) {
-            #timer { font-size: 3rem; letter-spacing: 5px; }
-        }
+        .btn:hover { background-color: #ffffff; color: #000000; }
+        #gift-btn { display: none; }
+        #error-msg { color: #ff4b2b; font-size: 0.75rem; margin-bottom: 15px; height: 1rem; display: none; }
+        @media (max-width: 600px) { #timer { font-size: 3rem; letter-spacing: 5px; } }
     </style>
 </head>
 <body>
@@ -104,26 +44,25 @@
 
         <div id="login-section">
             <div id="error-msg">Incorrect password, please try again.</div>
-            
             <div id="input-container">
                 <div class="input-group">
-                    <input type="text" id="username" placeholder="USERNAME" spellcheck="false">
+                    <input type="text" id="username" placeholder="USERNAME" spellcheck="false" autocomplete="off">
                     <div class="hint">English name</div>
                 </div>
                 <div class="input-group">
-                    <input type="password" id="password" placeholder="PASSWORD">
+                    <input type="password" id="password" placeholder="PASSWORD" autocomplete="off">
                     <div class="hint">Your birthday date</div>
                 </div>
                 <button class="btn" onclick="checkLogin()">Login</button>
             </div>
-
             <button id="gift-btn" class="btn" onclick="location.href='https://youtu.be/n5h1ijjV-Sc?si=tFSji8U_an91nisG'">Click me</button>
         </div>
     </div>
 
     <script>
-        // 設定目標日期
-        const targetDate = new Date("2026-03-24 00:00:00").getTime();
+        // --- 核心修正：強制指定台北時區 (GMT+0800) ---
+        // 這樣不論他在德國還是哪裡，都會以台北時間為準
+        const targetDate = new Date("2026-03-28T00:00:00+08:00").getTime();
 
         const timerEl = document.getElementById('timer');
         const countdownBox = document.getElementById('countdown-ui');
@@ -132,7 +71,6 @@
         const giftBtn = document.getElementById('gift-btn');
         const errorMsg = document.getElementById('error-msg');
 
-        // 倒數邏輯
         const interval = setInterval(() => {
             const now = new Date().getTime();
             const diff = targetDate - now;
@@ -144,24 +82,22 @@
                 return;
             }
 
-            const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const h = Math.floor((diff / (1000 * 60 * 60))); // 總剩餘小時，不設 24 小時限，確保顯示準確
             const m = Math.floor((diff / 1000 / 60) % 60);
             const s = Math.floor((diff / 1000) % 60);
             timerEl.innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
         }, 1000);
 
-        // 登入驗證邏輯
         function checkLogin() {
             const user = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value.trim();
 
-            // 正確條件：Zoe 0328 (忽略大小寫)
             if (user.toLowerCase() === "zoe" && pass === "0328") {
                 errorMsg.style.display = 'none';
-                inputContainer.style.display = 'none'; // 隱藏輸入框和 Login 鈕
-                giftBtn.style.display = 'block';     // 顯示 Click me
+                inputContainer.style.display = 'none';
+                giftBtn.style.display = 'block';
             } else {
-                errorMsg.style.display = 'block';    // 顯示錯誤訊息
+                errorMsg.style.display = 'block';
             }
         }
     </script>
