@@ -7,7 +7,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Montserrat:wght@200;400&display=swap" rel="stylesheet">
     <style>
         body {
-            margin: 0; padding: 0; background-color: #000; color: #fff;
+            margin: 0; padding: 0; 
+            /* 修改 1：加入微光背景，增加深邃感 */
+            background: radial-gradient(circle at 50% 50%, #151515 0%, #000 80%);
+            color: #fff;
             font-family: 'Cormorant Garamond', serif; min-height: 100vh;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             overflow: hidden; scroll-behavior: smooth;
@@ -29,11 +32,12 @@
         .time-part { 
             font-family: 'Playfair Display', serif; font-size: 3.5rem; 
             font-weight: 400; font-style: italic; letter-spacing: -1px; line-height: 1;
-            text-shadow: 0 0 20px rgba(255,255,255,0.15); 
+            /* 讓數字帶點發光質感 */
+            text-shadow: 0 0 30px rgba(255,255,255,0.25); 
         }
         .label { 
             display: block; font-family: 'Montserrat', sans-serif;
-            font-size: 0.6rem; color: #444; text-transform: uppercase; 
+            font-size: 0.6rem; color: #555; text-transform: uppercase; 
             margin-top: 10px; letter-spacing: 4px;
         }
 
@@ -58,14 +62,36 @@
         
         #gallery-section { display: none; width: 100%; text-align: center; padding-bottom: 100px; height: 100vh; overflow-y: auto; z-index: 10; position: relative; }
         .grid { display: flex; flex-direction: column; align-items: center; gap: 60px; margin-top: 60px; perspective: 2000px; }
-        .card-container { width: 240px; height: 426px; position: relative; transform-style: preserve-3d; transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 1.5s ease; cursor: pointer; opacity: 0; transform: translateY(40px); }
+        
+        /* 修改 2：卡片玻璃擬態樣式 */
+        .card-container { 
+            width: 240px; height: 426px; position: relative; 
+            transform-style: preserve-3d; transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 1.5s ease; 
+            cursor: pointer; opacity: 0; transform: translateY(40px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+        }
         .card-container.show { opacity: 1; transform: translateY(0); }
         .card-container.flipped { transform: rotateY(180deg); cursor: default; }
-        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; justify-content: center; align-items: center; border: 1px solid #1a1a1a; }
-        .card-front { background: #050505; color: #333; font-family: 'Playfair Display', serif; font-size: 2rem; font-style: italic; }
-        .card-back { background: #000; transform: rotateY(180deg); overflow: hidden; border: 1px solid #fff; }
+        
+        .card-face { 
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden; 
+            display: flex; justify-content: center; align-items: center; 
+            border: 1px solid rgba(255,255,255,0.08); /* 微弱的白邊 */
+        }
+        .card-front { 
+            background: rgba(10, 10, 10, 0.8); 
+            backdrop-filter: blur(5px); /* 毛玻璃感 */
+            color: #444; font-family: 'Playfair Display', serif; font-size: 2rem; font-style: italic; 
+        }
+        .card-back { 
+            background: #000; transform: rotateY(180deg); overflow: hidden; 
+            border: 1px solid rgba(255,255,255,0.4); /* 背面邊框加強質感 */
+            padding: 8px; box-sizing: border-box; /* 內縮模擬裱框感 */
+        }
         .card-back img { width: 100%; height: 100%; object-fit: cover; }
-        .special .card-front { background: #fff; color: #000; border: none; font-weight: 700; }
+        
+        /* 2026 特殊卡片 */
+        .special .card-front { background: #fff; color: #000; border: none; font-weight: 700; box-shadow: 0 0 25px rgba(255,255,255,0.3); }
 
         /* --- 4. 載入畫面 --- */
         #loading-overlay {
@@ -88,7 +114,7 @@
     <canvas id="snow-canvas"></canvas>
 
     <div id="countdown-section">
-        <div style="font-family:'Montserrat'; font-size:0.6rem; letter-spacing:8px; color:#222; margin-bottom:40px;">CHRONICLES</div>
+        <div style="font-family:'Montserrat'; font-size:0.6rem; letter-spacing:8px; color:#333; margin-bottom:40px;">CHRONICLES</div>
         <div id="countdown-ui">
             <div class="time-group"><span id="days" class="time-part">00</span><span class="label">days</span></div>
             <div class="time-group"><span id="hours" class="time-part">00</span><span class="label">hours</span></div>
@@ -123,7 +149,7 @@
     </div>
 
     <div id="gallery-section">
-        <div style="font-family: 'Playfair Display'; font-style: italic; color: #222; letter-spacing: 8px; font-size: 0.8rem; margin-top: 60px;">Archive 0328</div>
+        <div style="font-family: 'Playfair Display'; font-style: italic; color: #444; letter-spacing: 8px; font-size: 0.8rem; margin-top: 60px;">Archive 0328</div>
         <div class="grid" id="card-grid"></div>
     </div>
 
@@ -133,7 +159,7 @@
     </div>
 
     <script>
-        // --- 雪花效果 (保持不變) ---
+        // --- 雪花效果 ---
         const canvas = document.getElementById('snow-canvas');
         const ctx = canvas.getContext('2d');
         let width, height, snowflakes = [];
@@ -205,7 +231,6 @@
             }, 1000);
         }
 
-        // 修改：慢速音樂淡出
         function fadeOutMusic(audio, duration) {
             const startVolume = audio.volume;
             const step = startVolume / (duration / 50);
@@ -224,22 +249,17 @@
             container.innerHTML = `
                 <div class="card-face card-front"><span>${year}</span></div>
                 <div class="card-face card-back">
-                    ${year === '2026' ? '<span>GET READY!</span>' : `<img src="${year}.jpg">`}
+                    ${year === '2026' ? '<span style="color:#fff; font-family:\'Playfair Display\'; font-style:italic;">GET READY!</span>' : `<img src="${year}.jpg">`}
                 </div>
             `;
             container.onclick = function() {
                 if (this.classList.contains('flipped')) return;
                 this.classList.add('flipped');
                 if (year === '2026') {
-                    // 1. 顯示載入畫面
                     const loading = document.getElementById('loading-overlay');
                     loading.style.display = 'flex';
                     setTimeout(() => loading.style.opacity = '1', 100);
-
-                    // 2. 音樂在 3 秒內慢慢淡出
                     fadeOutMusic(document.getElementById('bg-music'), 3000); 
-
-                    // 3. 4 秒後才跳轉 (比音樂淡出長一點，感覺更完整)
                     setTimeout(() => {
                         window.location.href = 'https://youtu.be/ScPU-NydkK4?si=f2nYtUqryPVlZ9a7';
                     }, 4000);
