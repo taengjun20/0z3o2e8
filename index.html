@@ -8,38 +8,41 @@
     <style>
         body {
             margin: 0; padding: 0; 
-            /* 修改 1：加入微光背景，增加深邃感 */
             background: radial-gradient(circle at 50% 50%, #151515 0%, #000 80%);
             color: #fff;
             font-family: 'Cormorant Garamond', serif; min-height: 100vh;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             overflow: hidden; scroll-behavior: smooth;
+            transition: background 1.5s ease;
         }
 
-        /* --- 雪花 Canvas 樣式 --- */
-        #snow-canvas {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 1;
-        }
+        #snow-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
 
         /* --- 1. 倒數主畫面 --- */
-        #countdown-section { 
-            display: flex; flex-direction: column; align-items: center;
-            transition: opacity 1.5s ease; z-index: 10;
-        }
-        #countdown-ui { display: flex; gap: 25px; align-items: center; }
+        #countdown-section { display: flex; flex-direction: column; align-items: center; transition: all 1.5s ease; z-index: 10; }
+        #countdown-ui { display: flex; gap: 25px; align-items: center; transition: transform 0.2s; }
         .time-group { text-align: center; }
         .time-part { 
             font-family: 'Playfair Display', serif; font-size: 3.5rem; 
             font-weight: 400; font-style: italic; letter-spacing: -1px; line-height: 1;
-            /* 讓數字帶點發光質感 */
             text-shadow: 0 0 30px rgba(255,255,255,0.25); 
         }
-        .label { 
-            display: block; font-family: 'Montserrat', sans-serif;
-            font-size: 0.6rem; color: #555; text-transform: uppercase; 
-            margin-top: 10px; letter-spacing: 4px;
+        .label { display: block; font-family: 'Montserrat', sans-serif; font-size: 0.6rem; color: #555; text-transform: uppercase; margin-top: 10px; letter-spacing: 4px; }
+
+        /* 最後十秒激發態 */
+        .critical-hit { color: #fff !important; text-shadow: 0 0 40px #fff !important; transform: scale(1.2); transition: 0.2s; }
+        @keyframes bg-pulse-red { 0% { background: #000; } 100% { background: #200; } }
+        .body-critical { animation: bg-pulse-red 0.5s infinite alternate; }
+
+        /* --- 轉場層 (3秒白光 + 5秒文字) --- */
+        #transition-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff; z-index: 9999; opacity: 0; display: none;
+            justify-content: center; align-items: center; transition: opacity 2s ease, background 2s ease;
         }
+        #hb-text { font-family: 'Playfair Display', serif; font-size: 2.5rem; font-style: italic; letter-spacing: 12px; color: #fff; opacity: 0; }
+        @keyframes breathe { 0%, 100% { opacity: 0.2; filter: blur(2px); } 50% { opacity: 1; filter: blur(0px); } }
+        .breathe-animation { animation: breathe 2.5s infinite ease-in-out; }
 
         /* --- 2. 登入層 --- */
         #login-overlay {
@@ -56,14 +59,10 @@
         .login-btn { margin-top: 30px; padding: 15px; width: 100%; background: transparent; border: 1px solid #333; color: #fff; font-family: 'Montserrat', sans-serif; font-size: 0.7rem; letter-spacing: 4px; cursor: pointer; transition: all 0.5s; text-transform: uppercase; }
         .login-btn:hover { background: #fff; color: #000; border-color: #fff; }
 
-        /* --- 3. 藝廊與特殊過渡 --- */
-        #music-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 2000; justify-content: center; align-items: center; opacity: 0; transition: opacity 1.2s ease; text-align: center; }
-        #music-modal.active { display: flex; opacity: 1; }
-        
+        /* --- 3. 藝廊與相框設計 --- */
         #gallery-section { display: none; width: 100%; text-align: center; padding-bottom: 100px; height: 100vh; overflow-y: auto; z-index: 10; position: relative; }
         .grid { display: flex; flex-direction: column; align-items: center; gap: 60px; margin-top: 60px; perspective: 2000px; }
         
-        /* 修改 2：卡片玻璃擬態樣式 */
         .card-container { 
             width: 240px; height: 426px; position: relative; 
             transform-style: preserve-3d; transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 1.5s ease; 
@@ -73,24 +72,20 @@
         .card-container.show { opacity: 1; transform: translateY(0); }
         .card-container.flipped { transform: rotateY(180deg); cursor: default; }
         
-        .card-face { 
-            position: absolute; width: 100%; height: 100%; backface-visibility: hidden; 
-            display: flex; justify-content: center; align-items: center; 
-            border: 1px solid rgba(255,255,255,0.08); /* 微弱的白邊 */
-        }
-        .card-front { 
-            background: rgba(10, 10, 10, 0.8); 
-            backdrop-filter: blur(5px); /* 毛玻璃感 */
-            color: #444; font-family: 'Playfair Display', serif; font-size: 2rem; font-style: italic; 
-        }
+        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; justify-content: center; align-items: center; border: 1px solid rgba(255,255,255,0.08); }
+        .card-front { background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(5px); color: #444; font-family: 'Playfair Display', serif; font-size: 2rem; font-style: italic; }
+        
         .card-back { 
             background: #000; transform: rotateY(180deg); overflow: hidden; 
-            border: 1px solid rgba(255,255,255,0.4); /* 背面邊框加強質感 */
-            padding: 8px; box-sizing: border-box; /* 內縮模擬裱框感 */
+            padding: 10px; border: 1px solid #222; box-sizing: border-box;
+            position: relative;
         }
+        .card-back::before {
+            content: ''; position: absolute; top: 6px; left: 6px; right: 6px; bottom: 6px;
+            border: 1px solid rgba(218, 165, 32, 0.2); pointer-events: none;
+        }
+
         .card-back img { width: 100%; height: 100%; object-fit: cover; }
-        
-        /* 2026 特殊卡片 */
         .special .card-front { background: #fff; color: #000; border: none; font-weight: 700; box-shadow: 0 0 25px rgba(255,255,255,0.3); }
 
         /* --- 4. 載入畫面 --- */
@@ -105,7 +100,6 @@
         
         @keyframes loading { 0% { left: -100%; } 50% { left: 0; } 100% { left: 100%; } }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
-
         @media (max-width: 600px) { .time-part { font-size: 2.8rem; } .card-container { width: 210px; height: 373px; } }
     </style>
 </head>
@@ -121,6 +115,10 @@
             <div class="time-group"><span id="minutes" class="time-part">00</span><span class="label">mins</span></div>
             <div class="time-group"><span id="seconds" class="time-part">00</span><span class="label">secs</span></div>
         </div>
+    </div>
+
+    <div id="transition-overlay">
+        <div id="hb-text">Happy Birthday!</div>
     </div>
 
     <div id="login-overlay">
@@ -139,10 +137,9 @@
     </div>
 
     <audio id="bg-music" loop><source src="music.mp3" type="audio/mpeg"></audio>
-
-    <div id="music-modal">
+    <div id="music-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#000; z-index:2000; justify-content:center; align-items:center; opacity:0; transition:opacity 1.2s ease; text-align:center;">
         <div class="modal-content">
-            <div style="font-family:'Playfair Display'; font-style:italic; font-size:2.2rem; margin-bottom:20px;">Welcome! Zoe.</div>
+            <div style="font-family:'Playfair Display'; font-style:italic; font-size:2.2rem; margin-bottom:20px; color:#fff;">Welcome! Zoe.</div>
             <div style="color:#777; margin-bottom:40px; font-size:0.9rem; letter-spacing:1px; line-height:2;">The chronicles are unlocked.<br>Please turn on the audio to begin.</div>
             <button class="music-btn" style="padding:18px; width:280px; background:none; border:1px solid #333; color:#fff; cursor:pointer; letter-spacing:4px;" onclick="startWithMusic()">[ Start Experience ]</button>
         </div>
@@ -159,7 +156,6 @@
     </div>
 
     <script>
-        // --- 雪花效果 ---
         const canvas = document.getElementById('snow-canvas');
         const ctx = canvas.getContext('2d');
         let width, height, snowflakes = [];
@@ -175,28 +171,67 @@
         function animate() { ctx.clearRect(0, 0, width, height); snowflakes.forEach(flake => { flake.update(); flake.draw(); }); requestAnimationFrame(animate); }
         initSnow();
 
-        // --- 核心邏輯 ---
+        // 核心計時
         const targetDate = new Date("2026-03-28T00:00:00+08:00").getTime();
-        const years = ['2020', '2021', '2022', '2023', '2024', '2025', '2026'];
-        let currentIdx = 0;
+        let criticalTriggered = false;
 
         const interval = setInterval(() => {
             const now = new Date().getTime();
             const diff = targetDate - now;
-            if (diff <= 0) { clearInterval(interval); showLogin(); }
-            else {
+            if (diff <= 0) {
+                clearInterval(interval);
+                triggerBirthdayTransition();
+            } else {
+                const s = Math.floor((diff / 1000) % 60);
                 document.getElementById('days').innerText = Math.floor(diff / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
                 document.getElementById('hours').innerText = Math.floor((diff / (1000 * 60 * 60)) % 24).toString().padStart(2, '0');
                 document.getElementById('minutes').innerText = Math.floor((diff / 1000 / 60) % 60).toString().padStart(2, '0');
-                document.getElementById('seconds').innerText = Math.floor((diff / 1000) % 60).toString().padStart(2, '0');
+                document.getElementById('seconds').innerText = s.toString().padStart(2, '0');
+
+                if (diff <= 10000) {
+                    if(!criticalTriggered) { criticalTriggered = true; document.body.classList.add('body-critical'); }
+                    const sec = document.getElementById('seconds');
+                    sec.classList.add('critical-hit');
+                    setTimeout(() => sec.classList.remove('critical-hit'), 500);
+                    document.getElementById('countdown-ui').style.transform = `scale(${1 + (10-s)*0.02})`;
+                }
             }
         }, 1000);
 
-        function showLogin() {
+        function triggerBirthdayTransition() {
+            document.body.classList.remove('body-critical');
+            document.body.style.background = "#000";
+            const overlay = document.getElementById('transition-overlay');
+            const hbText = document.getElementById('hb-text');
             const countdown = document.getElementById('countdown-section');
+
+            overlay.style.display = 'flex';
+            setTimeout(() => { 
+                overlay.style.opacity = '1'; 
+                countdown.style.display = 'none';
+            }, 50);
+
+            setTimeout(() => {
+                overlay.style.background = '#000';
+                hbText.classList.add('breathe-animation');
+                setTimeout(() => {
+                    hbText.style.transition = 'all 2s ease';
+                    hbText.style.opacity = '0';
+                    setTimeout(() => {
+                        overlay.style.opacity = '0';
+                        setTimeout(() => {
+                            overlay.style.display = 'none';
+                            showLogin();
+                        }, 1000);
+                    }, 2000);
+                }, 5000);
+            }, 3000);
+        }
+
+        function showLogin() {
             const login = document.getElementById('login-overlay');
-            countdown.style.opacity = '0';
-            setTimeout(() => { countdown.style.display = 'none'; login.style.display = 'flex'; setTimeout(() => login.style.opacity = '1', 100); }, 1500);
+            login.style.display = 'flex';
+            setTimeout(() => login.style.opacity = '1', 100);
         }
 
         function handleLogin() {
@@ -216,13 +251,13 @@
         function showMusicModal() {
             const modal = document.getElementById('music-modal');
             modal.style.display = 'flex';
-            setTimeout(() => modal.classList.add('active'), 100);
+            setTimeout(() => modal.style.opacity = '1', 100);
         }
 
         function startWithMusic() {
             document.getElementById('bg-music').play();
             const modal = document.getElementById('music-modal');
-            modal.classList.remove('active');
+            modal.style.opacity = '0';
             setTimeout(() => {
                 modal.style.display = 'none';
                 document.body.style.overflow = 'auto';
@@ -231,14 +266,8 @@
             }, 1000);
         }
 
-        function fadeOutMusic(audio, duration) {
-            const startVolume = audio.volume;
-            const step = startVolume / (duration / 50);
-            const fade = setInterval(() => {
-                if (audio.volume > step) audio.volume -= step;
-                else { audio.volume = 0; audio.pause(); clearInterval(fade); }
-            }, 50);
-        }
+        const years = ['2020', '2021', '2022', '2023', '2024', '2025', '2026'];
+        let currentIdx = 0;
 
         function addCard() {
             if (currentIdx >= years.length) return;
@@ -259,9 +288,16 @@
                     const loading = document.getElementById('loading-overlay');
                     loading.style.display = 'flex';
                     setTimeout(() => loading.style.opacity = '1', 100);
-                    fadeOutMusic(document.getElementById('bg-music'), 3000); 
-                    setTimeout(() => {
-                        window.location.href = 'https://youtu.be/ScPU-NydkK4?si=f2nYtUqryPVlZ9a7';
+                    
+                    const audio = document.getElementById('bg-music');
+                    const fade = setInterval(() => {
+                        if (audio.volume > 0.05) audio.volume -= 0.05;
+                        else { audio.pause(); clearInterval(fade); }
+                    }, 100);
+                    
+                    // 這裡精準還原成你原本設定的 4000ms (4秒)
+                    setTimeout(() => { 
+                        window.location.href = 'https://youtu.be/NG8ZhM0lR0c'; 
                     }, 4000);
                     return;
                 }
